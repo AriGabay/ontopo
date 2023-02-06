@@ -90,6 +90,10 @@ export default {
       this.cursorPos = [event.pageX, event.pageY];
       this.$refs.carousel.addEventListener("pointermove", this.onMouseHold);
     },
+    imageUrlByDir(item) {
+      if (this.langOption.diraction === "ltr") return item.ltrImageUrl;
+      return item.imageUrl;
+    },
     onMouseHold(event) {
       event.preventDefault();
       const delta = [
@@ -108,11 +112,6 @@ export default {
       ) {
         this.$refs.carousel.scrollLeft -= this.currentSectionScrollCalc(1);
       }
-    },
-    watchRef() {
-      const elCarousel = this.$refs.carousel;
-      this.elIdOnScreen =
-        Math.abs(elCarousel.scrollLeft) / elCarousel.clientWidth + 1;
     },
     onClickArrow(isNext) {
       const step = this.currentSectionScrollCalc(1);
@@ -175,7 +174,10 @@ export default {
         :class="{
           'active-diraction': langOption.diraction === 'ltr',
         }"
-        :style="{ 'background-image': `url(${item.imageUrl})`, width: '100%' }"
+        :style="{
+          'background-image': `url(${imageUrlByDir(item)})`,
+          width: '100%',
+        }"
         class="carousel-item"
         @mouseenter="mouseOn = true"
         @mouseleave="mouseOn = false"
