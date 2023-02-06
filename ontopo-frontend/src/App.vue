@@ -153,7 +153,7 @@ export default {
 </script>
 
 <template>
-  <select @change="onSelectLang">
+  <select style="margin-bottom: 1.875rem" @change="onSelectLang">
     <option value="hebrew">עברית</option>
     <option value="english">English</option>
   </select>
