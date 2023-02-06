@@ -17,7 +17,7 @@ export default {
       isDragging: false,
       elIdOnScreen: 1,
       dataCarousel: [],
-      carouselTimer: 800,
+      carouselTimer: 1000,
     };
   },
   async mounted() {
