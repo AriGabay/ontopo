@@ -2,11 +2,15 @@
 import ArrowForwardSvg from "@/assets/svgs/arrow_forward.svg";
 import ArrowBackSvg from "@/assets/svgs/arrow_back.svg";
 import { getRequest } from "@/services/http-service.js";
+import CarouselCard from "@/components/Carousel/CarouselCard.vue";
+import Dots from "@/components/Carousel/Dots.vue";
 
 export default {
   components: {
     ArrowForwardSvg,
     ArrowBackSvg,
+    "carousel-card": CarouselCard,
+    "dots-component": Dots,
   },
   data() {
     return {
@@ -32,11 +36,6 @@ export default {
           Math.abs(elCarousel.scrollLeft) / elCarousel.clientWidth + 1;
       }
     }, this.carouselTimer);
-  },
-  beforeUnmount() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
   },
   unmounted() {
     if (this.intervalId) {
@@ -158,92 +157,60 @@ export default {
     <option value="english">English</option>
   </select>
   <div>
-    <div
-      id="carousel"
-      @pointerup="onMouseUp"
-      @pointercancel="onMouseUp"
-      @pointerleave="onMouseUp"
-      @pointerdown="onMouseDown"
-      class="carousel"
-      ref="carousel"
-    >
+    <div>
       <div
-        v-if:="dataCarousel.length"
-        v-for="item in dataCarousel"
-        :key="{ item }"
-        :class="{
-          'active-diraction': langOption.diraction === 'ltr',
-        }"
-        :style="{
-          'background-image': `url(${imageUrlByDir(item)})`,
-          width: '100%',
-        }"
-        class="carousel-item"
-        @mouseenter="mouseOn = true"
-        @mouseleave="mouseOn = false"
-        :data-id="item.id"
+        id="carousel"
+        @pointerup="onMouseUp"
+        @pointercancel="onMouseUp"
+        @pointerleave="onMouseUp"
+        @pointerdown="onMouseDown"
+        class="carousel"
+        ref="carousel"
       >
-        <div class="arrows-container" @click="onClickArrow(false)">
-          <arrowForwardSvg
-            v-if="langOption.diraction === 'rtl'"
-            class="arrows"
+        <div
+          v-if:="dataCarousel.length"
+          v-for="item in dataCarousel"
+          :key="{ item }"
+          :class="{
+            'active-diraction': langOption.diraction === 'ltr',
+          }"
+          :style="{
+            'background-image': `url(${imageUrlByDir(item)})`,
+          }"
+          class="carousel-item"
+          @mouseenter="mouseOn = true"
+          @mouseleave="mouseOn = false"
+          :data-id="item.id"
+        >
+          <div class="arrows-container" @click="onClickArrow(false)">
+            <arrowForwardSvg
+              v-if="langOption.diraction === 'rtl'"
+              class="arrows"
+            />
+            <arrowBackSvg
+              v-else-if="langOption.diraction === 'ltr'"
+              class="arrows"
+            />
+          </div>
+          <carousel-card
+            v-if="Object.keys(item).length > 0"
+            :item="item"
+            :langOption="langOption"
           />
-          <arrowBackSvg
-            v-else-if="langOption.diraction === 'ltr'"
-            class="arrows"
-          />
-        </div>
-        <div class="carousel-card">
-          <div
-            :class="{
-              'carousel-info': item.area === true,
-              'carousel-info-withwout-btn': item.area === false,
-            }"
-          >
-            <div class="carousel-title">
-              {{
-                langOption.lang === "english"
-                  ? item.engCarouselTitle
-                  : item.hebCarouselTitle
-              }}
-            </div>
-            <div class="carousel-content">
-              <button
-                v-if="item.area === true && langOption.diraction === 'rtl'"
-                class="carousel-btn"
-              >
-                כניסה למתחם
-              </button>
-              <button
-                v-else-if="item.area === true && langOption.diraction === 'ltr'"
-                class="carousel-btn"
-              >
-                Switch Market
-              </button>
-            </div>
+          <div @click="onClickArrow(true)" class="arrows-container">
+            <arrowBackSvg
+              v-if="langOption.diraction === 'rtl'"
+              class="arrows"
+            />
+            <arrowForwardSvg
+              v-else-if="langOption.diraction === 'ltr'"
+              class="arrows"
+            />
           </div>
         </div>
-        <div @click="onClickArrow(true)" class="arrows-container">
-          <arrowBackSvg v-if="langOption.diraction === 'rtl'" class="arrows" />
-          <arrowForwardSvg
-            v-else-if="langOption.diraction === 'ltr'"
-            class="arrows"
-          />
-        </div>
       </div>
     </div>
-    <div class="dots">
-      <div
-        v-for="(dot, index) in dataCarousel.length"
-        :class="{
-          'is-selected': index + 1 === elIdOnScreen,
-          'is-not-selected': index + 1 !== elIdOnScreen,
-        }"
-        :key="dot"
-      >
-        .
-      </div>
-    </div>
+    <dots-component :elIdOnScreen="elIdOnScreen" :dataCarousel="dataCarousel" />
   </div>
 </template>
 <style scoped>
@@ -266,16 +233,10 @@ export default {
   transform: scale(1);
   transition: transform 0.5s;
 }
-.is-selected {
-  color: white;
-}
-.is-not-selected {
-  opacity: 0.2;
-}
 .carousel-item {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
   background-size: cover;
   height: 30rem;
@@ -286,49 +247,6 @@ export default {
 .carousel-item-diraction {
   flex-direction: row-reverse;
 }
-.carousel-card {
-  width: 100%;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-}
-.carousel-content {
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-.carousel-info {
-  margin-top: 3.5rem;
-}
-.carousel-info-withwout-btn {
-  margin-top: 0;
-}
-.carousel-title {
-  width: 100%;
-  font-size: 3.5rem;
-  font-weight: 700;
-  white-space: nowrap;
-  font-family: Almoni-bold;
-  z-index: 100;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-.carousel-btn {
-  z-index: 100;
-  display: block;
-  font-size: 20px;
-  border-radius: 28px;
-  background: 0 0;
-  color: white;
-  padding: 1rem 4px;
-  border: 1.5px solid white;
-  text-align: center;
-  min-width: 10rem;
-  cursor: pointer;
-  width: auto;
-}
 .arrows-container {
   display: flex;
   align-items: center;
@@ -337,34 +255,19 @@ export default {
   width: 5rem;
   cursor: pointer;
 }
+.background-image {
+  width: 100%;
+}
 
 .arrows {
   width: 3.5rem;
   height: 3.5rem;
   color: white;
 }
-.dots {
-  color: white;
-  font-size: 4rem;
-  position: absolute;
-  bottom: 0px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
+
 @media screen and (max-width: 985px) {
   .arrows {
     display: none;
-  }
-}
-@media screen and (max-width: 950px) {
-  .carousel-btn {
-    padding: 4px 16px;
-    font-size: 14px;
-    line-height: 1;
-    font-weight: 500;
-    height: 100%;
   }
 }
 </style>
