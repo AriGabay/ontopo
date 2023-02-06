@@ -3,7 +3,6 @@ import "@/assets/main.css";
 
 export default {
   name: "dots-components",
-  //   components: {},
   props: { dataCarousel: Array, elIdOnScreen: Number },
 };
 </script>
